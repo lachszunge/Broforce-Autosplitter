@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="24">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>6</ID>
+      <Description>"Pointers that Work"</Description>
+      <Options moManualExpandCollapse="1"/>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>25</ID>
+          <Description>"Level ???"</Description>
+          <LastState Value="0" RealAddress="303E7FB8"/>
+          <VariableType>4 Bytes</VariableType>
+          <Address>"mono.dll"+001F8BE4</Address>
+          <Offsets>
+            <Offset>18</Offset>
+            <Offset>90</Offset>
+            <Offset>14C</Offset>
+            <Offset>6D4</Offset>
+            <Offset>A4</Offset>
+          </Offsets>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>26</ID>
+          <Description>"Menu"</Description>
+          <LastState Value="0" RealAddress="049B4B5C"/>
+          <VariableType>4 Bytes</VariableType>
+          <Address>"Broforce_beta.exe"+00FE5210</Address>
+          <Offsets>
+            <Offset>C</Offset>
+            <Offset>120</Offset>
+          </Offsets>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>27</ID>
+          <Description>"Game Speed"</Description>
+          <LastState Value="1" RealAddress="04E5385C"/>
+          <VariableType>Float</VariableType>
+          <Address>"Broforce_beta.exe"+0102055C</Address>
+          <Offsets>
+            <Offset>BC</Offset>
+          </Offsets>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>29</ID>
+          <Description>"Game Start Countdown"</Description>
+          <LastState Value="301.6127625" RealAddress="1E794360"/>
+          <VariableType>Float</VariableType>
+          <Address>"Broforce_beta.exe"+00FE4CB0</Address>
+          <Offsets>
+            <Offset>34</Offset>
+            <Offset>A8</Offset>
+            <Offset>30</Offset>
+          </Offsets>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>30</ID>
+          <Description>"Camera Shake"</Description>
+          <LastState Value="1" RealAddress="1078CD5C"/>
+          <VariableType>Float</VariableType>
+          <Address>"mono.dll"+001F40AC</Address>
+          <Offsets>
+            <Offset>12C</Offset>
+            <Offset>18C</Offset>
+            <Offset>3BC</Offset>
+          </Offsets>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>32</ID>
+          <Description>"Satan Health"</Description>
+          <VariableType>4 Bytes</VariableType>
+          <Address>"Broforce_beta.exe"+010205A8</Address>
+          <Offsets>
+            <Offset>1E8</Offset>
+            <Offset>98</Offset>
+            <Offset>18</Offset>
+            <Offset>6E4</Offset>
+            <Offset>220</Offset>
+          </Offsets>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>13</ID>
+      <Description>"Work in Progress"</Description>
+      <Options moManualExpandCollapse="1"/>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>36</ID>
+          <Description>"pointerscan result"</Description>
+          <LastState Value="39" RealAddress="0108FC54"/>
+          <VariableType>4 Bytes</VariableType>
+          <Address>"mono.dll"+00155468</Address>
+          <Offsets>
+            <Offset>478</Offset>
+            <Offset>48</Offset>
+            <Offset>590</Offset>
+            <Offset>434</Offset>
+            <Offset>550</Offset>
+          </Offsets>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>22</ID>
+      <Description>"Base Addresses"</Description>
+      <Options moManualExpandCollapse="1"/>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>31</ID>
+          <Description>"timer total"</Description>
+          <LastState Value="0" RealAddress="6B0B3B60"/>
+          <VariableType>Float</VariableType>
+          <Address>gameoverlayrenderer.dll+123B60</Address>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>8</ID>
+          <Description>"Fenster im Fokus"</Description>
+          <LastState Value="0" RealAddress="011601A8"/>
+          <VariableType>4 Bytes</VariableType>
+          <Address>Broforce_beta.exe+10201A8</Address>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>33</ID>
+          <Description>"isLoading"</Description>
+          <LastState Value="0" RealAddress="0115FDB2"/>
+          <VariableType>Byte</VariableType>
+          <Address>Broforce_beta.exe+101FDB2</Address>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+  <LuaScript>function CopyAddresslistValuesToClipboard()
+  local al=getAddressList()
+  local values=""
+  for i=8, al.Count-5 do
+    values=values..al[i].Value.."\n"
+  end
+  writeToClipboard(values)
+end
+
+copytimer=createTimer(nil)
+copytimer.OnTimer=CopyAddresslistValuesToClipboard
+copytimer.Interval=1000
+copytimer.Enabled=true
+</LuaScript>
+</CheatTable>
