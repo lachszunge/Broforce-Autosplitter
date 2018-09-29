@@ -1,3 +1,5 @@
+//this Autosplitter was made by
+//Argusdusty, Gammler33 and lachszunge
 state("Broforce_beta")
 {
 	// The level of the current campaign (used for splitting)
@@ -51,8 +53,8 @@ start
 
 isLoading
 {
-	//if (current.total_timer == old.total_timer || old.total_timer == 0) {
-	if (current.is_loading == 0) {
+	//is_loading is set to 4 after the satan introduction cut scene for whatever reason. If load removal does not work remove the second condition
+	if (current.is_loading == 0 || current.is_loading == 4) {
 		return false;
 	}else{
 		return true;
