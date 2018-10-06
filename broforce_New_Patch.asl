@@ -54,7 +54,7 @@ start
 isLoading
 {
 	//is_loading is set to 4 after the satan introduction cut scene for whatever reason. If load removal does not work remove the second condition
-	if (current.is_loading == 0 || current.is_loading == 4) {
+	if (current.is_loading == 0 || current.is_loading == 4 || current.is_loading == 3) {
 		return false;
 	}else{
 		return true;
