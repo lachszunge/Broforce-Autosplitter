@@ -1,6 +1,6 @@
 # Broforce-Autosplitter
 As the Title says this is an Autosplitter for speedrunning Broforce. <br/>
-"broforce_New_Patch.asl" is currently only able to split after every level (excluding the last level). <br/>
+"Broforce.asl" is currently only able to split after every level (excluding the last level). <br/>
 
 
 "Expendabros.asl" is an Autosplitter for the free promotional game Expendabros. <br/>
