@@ -1,6 +1,6 @@
 # Broforce-Autosplitter
 As the Title says this is an Autosplitter for speedrunning Broforce. <br/>
-"broforce_New_Patch.asl" is the finished autosplitter (currently not working). <br/>
+"broforce_New_Patch.asl" is currently not working. <br/>
 
 
 "Expendabros.asl" is an Autosplitter for the free promotional game Expendabros. <br/>
