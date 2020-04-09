@@ -1,6 +1,9 @@
 state("Expendabros")
 {
 	//Autosplitter by lachszunge
+	//with help from DerKo, Tedder and Coltaho
+	//and some Code copied from CryZe's "A Hat in Time" autosplitter
+	
 	
 	bool loading : "Expendabros.exe", 0x00A1AD00, 0xB0; // found by DerKO
 }
@@ -13,7 +16,7 @@ startup
 }
 init
 {
-	//Code copied from CryZe's "A Hat in Time" autosplitter
+	
     var ptr = IntPtr.Zero;
 
     foreach (var page in game.MemoryPages(true)) {
