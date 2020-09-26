@@ -10,8 +10,8 @@ startup
 	settings.SetToolTip("bossSplit", "Split only after a Boss Level");
 	
 	
-	int[] bossLevels = {5, 10, 15, 18, 22, 26, 29, 39, 44, 49, 63};
-	int bossKillCount = 0;
+	vars.bossLevels = new int[11] {5, 10, 15, 18, 22, 26, 29, 39, 44, 49, 63};
+	vars.bossKillCount = 0;
 
 
 }
@@ -47,13 +47,14 @@ split
 {
 	if (vars.level.Current == vars.level.Old + 1)
 	{
-		if (settings[bossSplit])
+		if(settings["bossSplit"])
 		{
-			if (vars.level.Old == bossLevels[bossKillCount])
+			if(vars.level.Old == vars.bossLevels[vars.bossKillCount])
 			{
-				bossKillCount++;
+				vars.bossKillCount++;
 				return true;
 			}
+			
 		}
 		else
 		{
