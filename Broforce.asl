@@ -5,6 +5,15 @@ startup
 {
 	vars.scanTarget = new SigScanTarget(15, "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8 ???????? 83 C4 10 8B 4D FC B8 ???????? 89 08 8B 05 ???????? C9 C3");
 
+	//Settings
+	settings.Add("bossSplit", false, "Split only after Boss");
+	settings.SetToolTip("bossSplit", "Split only after a Boss Level");
+	
+	
+	int[] bossLevels = {5, 10, 15, 18, 22, 26, 29, 39, 44, 49, 63};
+	int bossKillCount = 0;
+
+
 }
 init
 {
@@ -36,7 +45,19 @@ update
 
 split
 {
-	if (vars.level.Current == vars.level.Old + 1){
-		return true;
+	if (vars.level.Current == vars.level.Old + 1)
+	{
+		if (settings[bossSplit])
+		{
+			if (vars.level.Old == bossLevels[bossKillCount])
+			{
+				bossKillCount++;
+				return true;
+			}
+		}
+		else
+		{
+			return true;
+		}
 	}
 }
