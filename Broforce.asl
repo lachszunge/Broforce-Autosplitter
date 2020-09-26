@@ -42,6 +42,11 @@ update
 	vars.level.Update(game);
 }
 
+reset
+{
+	vars.bossKillCount = 0;
+}
+
 
 split
 {
