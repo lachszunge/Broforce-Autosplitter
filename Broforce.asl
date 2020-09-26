@@ -7,16 +7,42 @@ startup
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss");
-	settings.SetToolTip("bossSplit", "Split only after a Boss Level");
+	settings.SetToolTip("bossSplit", "Split only after a Boss Level (Restart livesplit/game to register change)");
+	settings.Add("bossTerrorkopter", true, "Terrorkopter", "bossSplit");
+	settings.Add("bossGR666", true, "GR666", "bossSplit");
+	settings.Add("bossMegacockter", true, "Megacockter", "bossSplit");
+	settings.Add("bossStealthTank", true, "Stealth Tank", "bossSplit");
+	settings.Add("bossSkyFortress", true, "Sky Fortress", "bossSplit");
+	settings.Add("bossRailFortress", true, "Rail Fortress", "bossSplit");
+	settings.Add("bossTerrorbot", true, "Terrorbot", "bossSplit");
+	settings.Add("bossAcidCrawler", true, "Acid Crawler", "bossSplit");
+	settings.Add("bossHumongoCrawler", true, "Humongo Crawler", "bossSplit");
+	settings.Add("bossTerrorkrawler", true, "Terrorkrawler", "bossSplit");
+	settings.Add("bossHeart", true, "Heart of the Hive", "bossSplit");
+	settings.Add("bossBoneWurm", true, "Bone Wurm", "bossSplit");
+	settings.Add("bossSatan", true, "Satan", "bossSplit");
+	settings.Add("bossSatanTrue", true, "Satan True Form", "bossSplit");
 	
+
+	vars.bossLevels = new int[14] {5, 10, 15, 18, 22, 26, 29, 34, 39, 44, 49, 57, 61, 63};
 	
-	vars.bossLevels = new int[11] {5, 10, 15, 18, 22, 26, 29, 39, 44, 49, 63};
-	vars.bossKillCount = 0;
 
 
 }
 init
 {
+
+	vars.bossKillCount = 0;
+	vars.selectedBossLevels = new bool[14] 
+	{
+		settings["bossTerrorkopter"], settings["bossGR666"], settings["bossMegacockter"],
+		settings["bossStealthTank"], settings["bossSkyFortress"], settings["bossRailFortress"],
+		settings["bossTerrorbot"], settings["bossAcidCrawler"], settings["bossHumongoCrawler"],
+		settings["bossTerrorkrawler"], settings["bossHeart"], settings["bossBoneWurm"],
+		settings["bossSatan"], settings["bossSatanTrue"]
+	};
+
+
     var ptr = IntPtr.Zero;
 
     foreach (var page in game.MemoryPages(true)) {
@@ -40,12 +66,12 @@ init
 update
 {
 	vars.level.Update(game);
+
+	if(vars.level.Current == 0){
+		vars.bossKillCount = 0;
+	}
 }
 
-reset
-{
-	vars.bossKillCount = 0;
-}
 
 
 split
@@ -54,12 +80,18 @@ split
 	{
 		if(settings["bossSplit"])
 		{
-			if(vars.level.Old == vars.bossLevels[vars.bossKillCount])
+			if(vars.level.Old == vars.bossLevels[vars.bossKillCount] )
 			{
-				vars.bossKillCount++;
-				return true;
+				if(vars.selectedBossLevels[vars.bossKillCount])
+				{
+					vars.bossKillCount = vars.bossKillCount + 1;
+					return true;
+				}
+				else
+				{
+					vars.bossKillCount = vars.bossKillCount + 1;
+				}
 			}
-			
 		}
 		else
 		{
