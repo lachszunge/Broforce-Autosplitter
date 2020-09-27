@@ -4,11 +4,11 @@ state("Broforce_beta")
 
 startup
 {
-	String signatureNetworkStreamIsPaused = "0FB6 05 ???????? C3 55 8B EC 83 EC 08 BA";
+	String signatureNetworkStreamIsPaused = "55 8B EC 83 EC 08 0FB6 45 08 85 C0 74 05 E8 ???????? B9 ???????? 0FB6";
 	String signatureGameState = "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8";
 
 	vars.scanGameState = new SigScanTarget(15, signatureGameState);
-	vars.scanNetworkStreamIsPaused = new SigScanTarget(3, signatureNetworkStreamIsPaused);
+	vars.scanNetworkStreamIsPaused = new SigScanTarget(20, signatureNetworkStreamIsPaused);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss");
