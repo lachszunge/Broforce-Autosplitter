@@ -1,9 +1,14 @@
 state("Broforce_beta")
 {
 }
+
 startup
 {
-	vars.scanTarget = new SigScanTarget(15, "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8 ???????? 83 C4 10 8B 4D FC B8 ???????? 89 08 8B 05 ???????? C9 C3");
+	String signatureNetworkStreamIsPaused = "0FB6 05 ???????? C3 55 8B EC 83 EC 08 BA";
+	String signatureGameState = "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8";
+
+	vars.scanGameState = new SigScanTarget(15, signatureGameState);
+	vars.scanNetworkStreamIsPaused = new SigScanTarget(3, signatureNetworkStreamIsPaused);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss");
@@ -22,13 +27,14 @@ startup
 	settings.Add("bossBoneWurm", true, "Bone Wurm", "bossSplit");
 	settings.Add("bossSatan", true, "Satan", "bossSplit");
 	settings.Add("bossSatanTrue", true, "Satan True Form", "bossSplit");
-	
+
+	settings.Add("onlineLoadRemoval", true, "Use online Load Removal");
+	settings.SetToolTip("onlineLoadRemoval", "This can be used to remove loading times in online Lobbys. This also works if you are playing solo in an online Lobby (mind performance!)");
 
 	vars.bossLevels = new int[14] {5, 10, 15, 18, 22, 26, 29, 34, 39, 44, 49, 57, 61, 63};
-	
-
 
 }
+
 init
 {
 
@@ -42,37 +48,58 @@ init
 		settings["bossSatan"], settings["bossSatanTrue"]
 	};
 
-
-    var ptr = IntPtr.Zero;
+	var ptrGameState = IntPtr.Zero;
+	var ptrNetworkStreamIsPaused = IntPtr.Zero;
 
     foreach (var page in game.MemoryPages(true)) {
 		var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
 
-		if (ptr == IntPtr.Zero) {
-			ptr = scanner.Scan(vars.scanTarget);
+		if (ptrGameState == IntPtr.Zero) {
+			ptrGameState = scanner.Scan(vars.scanGameState);
+		}
+		if (ptrNetworkStreamIsPaused == IntPtr.Zero) {
+			ptrNetworkStreamIsPaused = scanner.Scan(vars.scanNetworkStreamIsPaused);
 		} else {
 			break;
 		}
     }
-    if (ptr == IntPtr.Zero) {
+    if (ptrGameState == IntPtr.Zero) {
         Thread.Sleep(1000);
-		print("OH NOOO");
+		print("OH NO: Game State couldnt be located");
         throw new Exception();
 		
     }
-	vars.level = new MemoryWatcher<int>(new DeepPointer(ptr, 0x0, 0x18));
+	if (ptrNetworkStreamIsPaused == IntPtr.Zero) {
+        Thread.Sleep(1000);
+		print("OH NO: Networking streamIsPaused couldnt be located");
+        throw new Exception();
+		
+    }
+	vars.level = new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x18));
+	vars.streamIsPaused = new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0));
 }
 
 update
 {
 	vars.level.Update(game);
+	vars.streamIsPaused.Update(game);
 
 	if(vars.level.Current == 0){
 		vars.bossKillCount = 0;
 	}
 }
 
-
+isLoading
+{
+	if(settings["onlineLoadRemoval"] && vars.streamIsPaused.Current == 1)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 split
 {
