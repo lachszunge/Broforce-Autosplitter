@@ -74,13 +74,13 @@ startup
 	settings.SetToolTip("onlineLoadRemoval", "This can be used to remove loading times in online Lobbys. This also works if you are playing solo in an online Lobby (mind performance!)");
 
 	vars.bossLevels = new int[14] {5, 10, 15, 18, 22, 26, 29, 34, 39, 44, 49, 57, 61, 63};
-
+	vars.bossKillCount = 0;
 }
 
 init
 {
 
-	vars.bossKillCount = 0;
+	
 	vars.selectedBossLevels = new bool[14] 
 	{
 		settings["bossTerrorkopter"], settings["bossGR666"], settings["bossMegacockter"],
@@ -125,16 +125,16 @@ init
         throw new Exception();
 		
     }
-	vars.level = new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x30));
-	vars.streamIsPaused = new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0));
+	vars.watchers = new MemoryWatcherList();
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x30)) {Name = "level"});
+	vars.watchers.Add(new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0)) {Name = "streamIsPaused"});
 }
 
 update
 {
-	vars.level.Update(game);
-	vars.streamIsPaused.Update(game);
+	vars.watchers.UpdateAll(game);
 
-	if(vars.level.Current == 0)
+	if(vars.watchers["level"].Current == 0)
 	{
 		vars.bossKillCount = 0;
 	}
@@ -142,7 +142,7 @@ update
 
 isLoading
 {
-	if(settings["onlineLoadRemoval"] && vars.streamIsPaused.Current == 1)
+	if(settings["onlineLoadRemoval"] && vars.watchers["streamIsPaused"].Current == 1)
 	{
 		return true;
 	}
@@ -154,11 +154,11 @@ isLoading
 
 split
 {
-	if (vars.level.Current == vars.level.Old + 1)
+	if (vars.watchers["level"].Current == vars.watchers["level"].Old + 1)
 	{
 		if(settings["bossSplit"])
 		{
-			if(vars.level.Old == vars.bossLevels[vars.bossKillCount] )
+			if(vars.watchers["level"].Old == vars.bossLevels[vars.bossKillCount] )
 			{
 				if(vars.selectedBossLevels[vars.bossKillCount])
 				{
