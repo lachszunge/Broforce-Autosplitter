@@ -1,3 +1,17 @@
+/*
+* Current Features:
+* Split after every level, except final level
+* Remove loads when playing in online lobby
+* Reset run when entering main menu
+*
+* Missing Features:
+* Automatic Start
+* Final Split
+* Singleplayaer load removal
+*/
+
+
+
 state("Broforce_beta")
 {
 }
@@ -73,6 +87,8 @@ startup
 	settings.Add("onlineLoadRemoval", true, "Use online Load Removal");
 	settings.SetToolTip("onlineLoadRemoval", "This can be used to remove loading times in online Lobbys. This also works if you are playing solo in an online Lobby (mind performance!)");
 
+	settings.Add("autoReset", true, "Automatically reset when in Main Menu");
+	
 	vars.bossLevels = new int[14] {5, 10, 15, 18, 22, 26, 29, 34, 39, 44, 49, 57, 61, 63};
 	vars.bossKillCount = 0;
 }
@@ -127,6 +143,7 @@ init
     }
 	vars.watchers = new MemoryWatcherList();
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x30)) {Name = "level"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x40)) {Name = "gameMode"});
 	vars.watchers.Add(new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0)) {Name = "streamIsPaused"});
 }
 
@@ -137,6 +154,14 @@ update
 	if(vars.watchers["level"].Current == 0)
 	{
 		vars.bossKillCount = 0;
+	}
+}
+
+reset
+{
+	//GameMode 5 = NotSet; 
+	if (settings["autoReset"] && vars.watchers["gameMode"].Current == 5) {
+		return true;
 	}
 }
 
