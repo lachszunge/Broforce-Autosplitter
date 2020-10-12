@@ -4,11 +4,53 @@ state("Broforce_beta")
 
 startup
 {
-	String signatureNetworkStreamIsPaused = "55 8B EC 83 EC 08 0FB6 45 08 85 C0 74 05 E8 ???????? B9 ???????? 0FB6";
-	String signatureGameState = "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8";
+	//OLD PATCH
+	//String signatureNetworkStreamIsPaused = "55 8B EC 83 EC 08 0FB6 45 08 85 C0 74 05 E8 ???????? B9 ???????? 0FB6";
+	//String signatureGameState = "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8";
 
-	vars.scanGameState = new SigScanTarget(15, signatureGameState);
-	vars.scanNetworkStreamIsPaused = new SigScanTarget(20, signatureNetworkStreamIsPaused);
+
+	//CURRENT PATCH
+	String signatureNetworkStreamIsPaused = "74 15 " +			//je Networking:Networking:set_PauseStream+25
+						"48 83 EC 20 " +		//sub rsp,20
+						"49 BB ???????????????? " +	//mov r11 RPCBatcher:FlushQueue
+						"41 FF D3 " +			//call r11
+						"48 83 C4 20 " +		//add rsp,20
+						"48 B8 ???????????????? " +	//mov rax,????????????????		<--- streamIsPaused
+						"40 88 30 " +			//mov [rax],sil
+						"85 F6";			//test esi,esi
+						
+	String signatureGameState = "00 00 " +				//add [rax],al
+				"00 55 48 " +				//add [rbp + 48],dl
+				"8B EC " +				//mov ebp,esp
+				"48 83 EC 10 " +			//sub rsp,10
+				"48 B8 ???????????????? " +		//mov rax,????????????????			<--- GameState.Instance
+				"48 8B 00 " +				//mov rax,[rax]
+				"48 85 C0 " +				//test rax,rax
+				"0F85 4C000000 " +			//jne GameState:get_Instance+6a
+				"48 B9 ???????????????? " +		//mov rcx,????????????????
+				"48 83 EC 20 " +			//sub rsp,20
+				"49 BB ???????????????? " +		//mov r11,System:Object:_icall_wrapper_mono_object_new_fast
+				"41 FF D3 " +				//call r11
+				"48 83 C4 20 " +			//add rsp,20
+				"48 89 45 F8 " +			//mov [rbp-08],rax
+				"48 8B C8 " +				//mov rcx,rax
+				"48 83 EC 20 " +			//sub rsp,20
+				"49 BB ???????????????? " +		//mov r11,GameState:.ctor
+				"41 FF D3 " +				//call r11
+				"48 83 C4 20 " +			//add rsp,20
+				"48 8B 4D F8 " +			//mov rcx,[rbp-08]
+				"48 B8 ???????????????? " +		//mov rax,????????????????
+				"48 89 08 " +				//mov [rax],rcx
+				"48 B8 ???????????????? " +		//mov rax,????????????????0
+				"48 8B 00 " +				//mov rax,[rax]
+				"C9 " +					//leave
+				"C3";					//ret
+						
+						
+						
+
+	vars.scanGameState = new SigScanTarget(13, signatureGameState);
+	vars.scanNetworkStreamIsPaused = new SigScanTarget(25, signatureNetworkStreamIsPaused);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss");
@@ -59,7 +101,9 @@ init
 		}
 		if (ptrNetworkStreamIsPaused == IntPtr.Zero) {
 			ptrNetworkStreamIsPaused = scanner.Scan(vars.scanNetworkStreamIsPaused);
-		} else {
+		}
+		
+		if (ptrNetworkStreamIsPaused != IntPtr.Zero && ptrGameState != IntPtr.Zero){
 			break;
 		}
     }
