@@ -7,7 +7,7 @@
 * Missing Features:
 * Automatic Start
 * Final Split
-* Singleplayaer load removal
+* Singleplayer load removal
 */
 
 
