@@ -119,7 +119,7 @@ init
         throw new Exception();
 		
     }
-	vars.level = new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x18));
+	vars.level = new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x30));
 	vars.streamIsPaused = new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0));
 }
 
