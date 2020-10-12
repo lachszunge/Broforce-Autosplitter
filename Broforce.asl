@@ -93,28 +93,34 @@ init
 	var ptrGameState = IntPtr.Zero;
 	var ptrNetworkStreamIsPaused = IntPtr.Zero;
 
-    foreach (var page in game.MemoryPages(true)) {
+    foreach (var page in game.MemoryPages(true))
+    {
 		var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
 
-		if (ptrGameState == IntPtr.Zero) {
+		if (ptrGameState == IntPtr.Zero)
+		{
 			ptrGameState = scanner.Scan(vars.scanGameState);
 		}
-		if (ptrNetworkStreamIsPaused == IntPtr.Zero) {
+		if (ptrNetworkStreamIsPaused == IntPtr.Zero)
+		{
 			ptrNetworkStreamIsPaused = scanner.Scan(vars.scanNetworkStreamIsPaused);
 		}
 		
-		if (ptrNetworkStreamIsPaused != IntPtr.Zero && ptrGameState != IntPtr.Zero){
+		if (ptrNetworkStreamIsPaused != IntPtr.Zero && ptrGameState != IntPtr.Zero)
+		{
 			break;
 		}
     }
-    if (ptrGameState == IntPtr.Zero) {
-        Thread.Sleep(1000);
+    if (ptrGameState == IntPtr.Zero)
+    {
+        Thread.Sleep(5000);
 		print("OH NO: Game State couldnt be located");
         throw new Exception();
 		
     }
-	if (ptrNetworkStreamIsPaused == IntPtr.Zero) {
-        Thread.Sleep(1000);
+	if (ptrNetworkStreamIsPaused == IntPtr.Zero)
+	{
+        Thread.Sleep(5000);
 		print("OH NO: Networking streamIsPaused couldnt be located");
         throw new Exception();
 		
@@ -128,7 +134,8 @@ update
 	vars.level.Update(game);
 	vars.streamIsPaused.Update(game);
 
-	if(vars.level.Current == 0){
+	if(vars.level.Current == 0)
+	{
 		vars.bossKillCount = 0;
 	}
 }
