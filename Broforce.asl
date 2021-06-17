@@ -67,7 +67,7 @@ startup
 	vars.scanNetworkStreamIsPaused = new SigScanTarget(25, signatureNetworkStreamIsPaused);
 
 	//Settings
-	settings.Add("bossSplit", false, "Split only after Boss");
+	settings.Add("bossSplit", false, "Split only after Boss (Arcade)");
 	settings.SetToolTip("bossSplit", "Split only after a Boss Level (Restart livesplit/game to register change)");
 	settings.Add("bossTerrorkopter", true, "Terrorkopter", "bossSplit");
 	settings.Add("bossGR666", true, "GR666", "bossSplit");
@@ -86,6 +86,8 @@ startup
 
 	settings.Add("onlineLoadRemoval", true, "Use online Load Removal");
 	settings.SetToolTip("onlineLoadRemoval", "This can be used to remove loading times in online Lobbys. This also works if you are playing solo in an online Lobby (mind performance!)");
+
+	settings.Add("campaignSplits", false, "Spllit after every World (Campaign)");
 
 	settings.Add("autoReset", true, "Automatically reset when in Main Menu");
 	
@@ -179,8 +181,9 @@ isLoading
 
 split
 {
-	if (vars.watchers["level"].Current == vars.watchers["level"].Old + 1)
+	if (vars.watchers["level"].Current == vars.watchers["level"].Old + 1 && !settings["campaignSplits"])
 	{
+		
 		if(settings["bossSplit"])
 		{
 			if(vars.watchers["level"].Old == vars.bossLevels[vars.bossKillCount] )
@@ -200,5 +203,9 @@ split
 		{
 			return true;
 		}
+	}
+	else if (settings["campaignSplits"] && vars.watchers["level"].Current < vars.watchers["level"].Old)
+	{
+		return true;
 	}
 }
