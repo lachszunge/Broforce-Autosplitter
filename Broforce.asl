@@ -144,8 +144,8 @@ init
 		
     }
 	vars.watchers = new MemoryWatcherList();
-	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x30)) {Name = "level"});
-	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x40)) {Name = "gameMode"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x38)) {Name = "level"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x48)) {Name = "gameMode"});
 	vars.watchers.Add(new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0)) {Name = "streamIsPaused"});
 }
 
