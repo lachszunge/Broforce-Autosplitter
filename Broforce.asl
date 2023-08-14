@@ -3,14 +3,12 @@
 * Split after every level, except final level
 * Remove loads when playing in online lobby
 * Reset run when entering main menu
+* Load Removal
 *
 * Missing Features:
 * Automatic Start
 * Final Split
-* Singleplayer load removal
 */
-
-
 
 state("Broforce_beta")
 {
@@ -18,53 +16,65 @@ state("Broforce_beta")
 
 startup
 {
-	//OLD PATCH
-	//String signatureNetworkStreamIsPaused = "55 8B EC 83 EC 08 0FB6 45 08 85 C0 74 05 E8 ???????? B9 ???????? 0FB6";
-	//String signatureGameState = "00 00 00 00 00 00 00 55 8B EC 83 EC 08 8B 05 ???????? 85 C0 75 29 83 EC 0C 68 ???????? E8 ???????? 83 C4 10 83 EC 0C 89 45 FC 50 E8";
+	//This is the bytecode for the GameState::getInstance() method
+	//Three packages of 00 have been added to the beginning, otherwise a unique match may not be found in memory
 
-
-	//CURRENT PATCH
-	String signatureNetworkStreamIsPaused = "74 15 " +			//je Networking:Networking:set_PauseStream+25
-						"48 83 EC 20 " +		//sub rsp,20
-						"49 BB ???????????????? " +	//mov r11 RPCBatcher:FlushQueue
-						"41 FF D3 " +			//call r11
-						"48 83 C4 20 " +		//add rsp,20
-						"48 B8 ???????????????? " +	//mov rax,????????????????		<--- streamIsPaused
-						"40 88 30 " +			//mov [rax],sil
-						"85 F6";			//test esi,esi
-						
-	String signatureGameState = "00 00 " +				//add [rax],al
+	String signatureGameState = "00 00 " +	//add [rax],al
 				"00 55 48 " +				//add [rbp + 48],dl
-				"8B EC " +				//mov ebp,esp
+				"8B EC " +					//mov ebp,esp
 				"48 83 EC 10 " +			//sub rsp,10
-				"48 B8 ???????????????? " +		//mov rax,????????????????			<--- GameState.Instance
+				"48 B8 ???????????????? " +	//mov rax,????????????????			<--- GameState.Instance
 				"48 8B 00 " +				//mov rax,[rax]
 				"48 85 C0 " +				//test rax,rax
 				"0F85 4C000000 " +			//jne GameState:get_Instance+6a
-				"48 B9 ???????????????? " +		//mov rcx,????????????????
+				"48 B9 ???????????????? " +	//mov rcx,????????????????
 				"48 83 EC 20 " +			//sub rsp,20
-				"49 BB ???????????????? " +		//mov r11,System:Object:_icall_wrapper_mono_object_new_fast
+				"49 BB ???????????????? " +	//mov r11,System:Object:_icall_wrapper_mono_object_new_fast
 				"41 FF D3 " +				//call r11
 				"48 83 C4 20 " +			//add rsp,20
 				"48 89 45 F8 " +			//mov [rbp-08],rax
 				"48 8B C8 " +				//mov rcx,rax
 				"48 83 EC 20 " +			//sub rsp,20
-				"49 BB ???????????????? " +		//mov r11,GameState:.ctor
+				"49 BB ???????????????? " +	//mov r11,GameState:.ctor
 				"41 FF D3 " +				//call r11
 				"48 83 C4 20 " +			//add rsp,20
 				"48 8B 4D F8 " +			//mov rcx,[rbp-08]
-				"48 B8 ???????????????? " +		//mov rax,????????????????
+				"48 B8 ???????????????? " +	//mov rax,????????????????
 				"48 89 08 " +				//mov [rax],rcx
-				"48 B8 ???????????????? " +		//mov rax,????????????????0
+				"48 B8 ???????????????? " +	//mov rax,????????????????0
 				"48 8B 00 " +				//mov rax,[rax]
-				"C9 " +					//leave
-				"C3";					//ret
-						
-						
-						
+				"C9 " +						//leave
+				"C3";						//ret
 
-	vars.scanGameState = new SigScanTarget(13, signatureGameState);
-	vars.scanNetworkStreamIsPaused = new SigScanTarget(25, signatureNetworkStreamIsPaused);
+	//This is the Bytecode for the SceneLoader::LevelLoadComplete() method
+
+	String signatureIsLoadingScene = "00 00 00 " +
+				"55 " +
+				"48 8B EC " +
+				"48 83 EC 10 " +
+				"48 89 4D F8 " +
+				"48 89 55 F0 " +
+				"48 B8 ???????????????? " +		//<----- _numScenesLoading
+				"48 63 08 " +
+				"FF C1 " +
+				"48 B8 ???????????????? " +
+				"89 08 " +
+				"48 B8 ???????????????? " +		//<----- _isLoadingScene
+				"C6 00 01 " +
+				"48 8B 4D F8 " +
+				"48 63 55 F0 " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"C9 " +
+				"C3 00 00";
+						
+						
+						
+	//The Byte offset inside the signature is defined here (0x30 HEX = 48 DEC)
+	vars.scanGameState = new SigScanTarget(0xD, signatureGameState);
+	vars.scanIsLoading = new SigScanTarget(0x30, signatureIsLoadingScene);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss (Arcade)");
@@ -84,8 +94,8 @@ startup
 	settings.Add("bossSatan", true, "Satan", "bossSplit");
 	settings.Add("bossSatanTrue", true, "Satan True Form", "bossSplit");
 
-	settings.Add("onlineLoadRemoval", true, "Use online Load Removal");
-	settings.SetToolTip("onlineLoadRemoval", "This can be used to remove loading times in online Lobbys. This also works if you are playing solo in an online Lobby (mind performance!)");
+	settings.Add("loadRemoval", true, "Remove Load Times");
+	settings.SetToolTip("loadRemoval", "Pauses the timer when the game loads");
 
 	settings.Add("campaignSplits", false, "Spllit after every World (Campaign)");
 
@@ -109,8 +119,9 @@ init
 	};
 
 	var ptrGameState = IntPtr.Zero;
-	var ptrNetworkStreamIsPaused = IntPtr.Zero;
+	var ptrIsLoading = IntPtr.Zero;
 
+	//Scan the memory for the specified signatures
     foreach (var page in game.MemoryPages(true))
     {
 		var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
@@ -119,16 +130,19 @@ init
 		{
 			ptrGameState = scanner.Scan(vars.scanGameState);
 		}
-		if (ptrNetworkStreamIsPaused == IntPtr.Zero)
+		if (ptrIsLoading == IntPtr.Zero)
 		{
-			ptrNetworkStreamIsPaused = scanner.Scan(vars.scanNetworkStreamIsPaused);
+			ptrIsLoading = scanner.Scan(vars.scanIsLoading);
 		}
 		
-		if (ptrNetworkStreamIsPaused != IntPtr.Zero && ptrGameState != IntPtr.Zero)
+		//once both signatures have been found abort the search
+		if (ptrGameState != IntPtr.Zero && ptrIsLoading != IntPtr.Zero)
 		{
 			break;
 		}
     }
+
+	//If no match is found throw an error
     if (ptrGameState == IntPtr.Zero)
     {
         Thread.Sleep(5000);
@@ -136,21 +150,23 @@ init
         throw new Exception();
 		
     }
-	if (ptrNetworkStreamIsPaused == IntPtr.Zero)
+	if (ptrIsLoading == IntPtr.Zero)
 	{
         Thread.Sleep(5000);
-		print("OH NO: Networking streamIsPaused couldnt be located");
+		print("OH NO: IsLoading couldnt be located");
         throw new Exception();
-		
     }
+
+	//Define Watchers to constantly read the found addresses
 	vars.watchers = new MemoryWatcherList();
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x38)) {Name = "level"});
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x48)) {Name = "gameMode"});
-	vars.watchers.Add(new MemoryWatcher<byte>(new DeepPointer(ptrNetworkStreamIsPaused, 0x0)) {Name = "streamIsPaused"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrIsLoading, 0x0)) {Name = "isLoading"});
 }
 
 update
 {
+	//update watcher variables
 	vars.watchers.UpdateAll(game);
 
 	if(vars.watchers["level"].Current == 0)
@@ -169,14 +185,10 @@ reset
 
 isLoading
 {
-	if(settings["onlineLoadRemoval"] && vars.watchers["streamIsPaused"].Current == 1)
-	{
+	if (settings["loadRemoval"] && vars.watchers["isLoading"].Current == 1) {
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 split
