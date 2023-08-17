@@ -13,6 +13,9 @@ startup
 	String signaturePlayer = "55 8B EC 57 56 8B 05 ???????? 83 EC 08 6A 00 50 E8 42C0FFFF";
 	vars.scanTargetLevel = new SigScanTarget(8, signatureLevel);
 	vars.scanTargetPlayer = new SigScanTarget(7, signaturePlayer);
+
+	settings.Add("startBroCeasar", true, "Start with Bro Ceasar");
+	settings.SetToolTip("startBroCeasar", "Only start the timer when you have Bro Ceasar on the first level.");
 }
 init
 {
@@ -63,15 +66,21 @@ update
 	vars.currentBro.Update(game);
 	vars.isOnHeli.Update(game);
 }
+
 start
 {
-	if(vars.level.Current == 0 && vars.currentBro.Current == 27)
-	{
-		return true;
+	if (settings["startBroCeasar"]){
+		if(vars.level.Current == 0 && vars.currentBro.Current == 27)
+		{
+			return true;
+		}
+	}else{
+		if(vars.level.Current == 0 && vars.currentBro.Current != 0 && vars.currentBro.Current != vars.currentBro.Old)
+		{
+			return true;
+		}
 	}
 }
-
-
 
 split
 {
