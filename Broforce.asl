@@ -69,12 +69,30 @@ startup
 				"48 83 C4 20 " +
 				"C9 " +
 				"C3 00 00";
+
+	//This is the Bytecode for the HealthBar::HideHealthBar() method
+
+	String signatureHealthBar = "00 00 " +		//0
+				"55 " +							//2
+				"48 8B EC " +					//3
+				"48 B8 ???????????????? " +		//<----- HealthBar.Instance
+				"48 8B 00 " +
+				"48 8B C8 " +
+				"48 83 EC 20" +
+				"83 38 00 " +
+				"49 BB ????????????????" +		//<----- HealthBar:Hide
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"C9 " +
+				"C3 " +
+				"00 00";
 						
 						
 						
 	//The Byte offset inside the signature is defined here (0x30 HEX = 48 DEC)
 	vars.scanGameState = new SigScanTarget(0xD, signatureGameState);
 	vars.scanIsLoading = new SigScanTarget(0x30, signatureIsLoadingScene);
+	vars.scanHealthBar = new SigScanTarget(0x8, signatureHealthBar);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss (Arcade)");
@@ -120,6 +138,7 @@ init
 
 	var ptrGameState = IntPtr.Zero;
 	var ptrIsLoading = IntPtr.Zero;
+	var ptrHealthBar = IntPtr.Zero;
 
 	//Scan the memory for the specified signatures
     foreach (var page in game.MemoryPages(true))
@@ -134,9 +153,13 @@ init
 		{
 			ptrIsLoading = scanner.Scan(vars.scanIsLoading);
 		}
+		if (ptrHealthBar == IntPtr.Zero)
+		{
+			ptrHealthBar = scanner.Scan(vars.scanHealthBar);
+		}
 		
 		//once both signatures have been found abort the search
-		if (ptrGameState != IntPtr.Zero && ptrIsLoading != IntPtr.Zero)
+		if (ptrGameState != IntPtr.Zero && ptrIsLoading != IntPtr.Zero && ptrHealthBar != IntPtr.Zero)
 		{
 			break;
 		}
@@ -157,11 +180,20 @@ init
         throw new Exception();
     }
 
+	if (ptrHealthBar == IntPtr.Zero)
+	{
+        Thread.Sleep(5000);
+		print("OH NO: HealthBar couldnt be located");
+        throw new Exception();
+    }
+
 	//Define Watchers to constantly read the found addresses
 	vars.watchers = new MemoryWatcherList();
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x38)) {Name = "level"});
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x48)) {Name = "gameMode"});
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrIsLoading, 0x0)) {Name = "isLoading"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHealthBar, 0x0, 0x40)) {Name = "healthBarVisible"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHealthBar, 0x0, 0x30, 0xD4)) {Name = "healthBarUnitHealth"});
 }
 
 update
@@ -193,6 +225,11 @@ isLoading
 
 split
 {
+	if (vars.watchers["level"].Current == 63 && vars.watchers["healthBarVisible"].Current == 1 && vars.watchers["healthBarUnitHealth"].Current == -1)
+	{
+		return true;
+	}
+
 	if (vars.watchers["level"].Current == vars.watchers["level"].Old + 1 && !settings["campaignSplits"])
 	{
 		
@@ -220,4 +257,5 @@ split
 	{
 		return true;
 	}
+	return false;
 }
