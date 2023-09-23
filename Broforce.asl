@@ -86,6 +86,108 @@ startup
 				"C9 " +
 				"C3 " +
 				"00 00";
+
+	
+	//This is the bytecode for the HeroController::getInstance() method
+	//Three packages of 00 have been added to the beginning, otherwise a unique match may not be found in memory
+
+	String signatureHeroController = "00 00 " +
+				"00 55 48 " +
+				"8B EC " +
+				"56 " +
+				"57 " +
+				"48 B8 ???????????????? " +			//<----- HeroController.Instance
+				"48 8B 08 " +
+				"33 D2 " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +			// UnityEngine.Object:op_Equality
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"85 C0 " +
+				"0F84 ???????? " +
+				"48 B9 ???????????????? " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B F0 " +
+				"48 8B FE " +
+				"48 85 F6 " +
+				"74 29 " +
+				"48 8B 06 " +
+				"48 8B 30 " +
+				"0FB7 46 18 " +
+				"48 83 F8 07 " +
+				"72 17 " +
+				"48 8B 46 10 " +
+				"48 8B 40 30 " +
+				"48 B9 ???????????????? " +
+				"48 3B C1 " +
+				"74 02 " +
+				"33 FF " +
+				"48 B8 ???????????????? " +			//<----- HeroController.Instance
+				"48 89 38 " +
+				"48 B8 ???????????????? " +			//<----- HeroController.Instance
+				"48 8B 00 " +
+				"48 8D 65 F0 " +
+				"5F " +
+				"5E " +
+				"C9 " +
+				"C3 " +
+				"00 00";
+
+
+	//This is the bytecode for the Helicopter3D::Awake() method
+	String signatureHelicopter3D = "00 00 00 " +
+				"55 " +
+				"48 8B EC " +
+				"56 " +
+				"48 83 EC 28 " +
+				"48 8B F1 " +
+				"48 B8 ???????????????? " +			//<----- Helicopter3D.Instance
+				"48 89 30 " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B CE " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B CD " +
+				"48 83 C1 D8 " +
+				"48 8B D0 " +
+				"48 83 EC 20 " +
+				"83 38 00 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8D 86 08010000 " +
+				"48 8B 4D D8 " +
+				"48 89 08 " +
+				"48 63 4D E0 " +
+				"89 48 08 " +
+				"48 8B CE " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B C8 " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B CE " +
+				"BA 01000000 " +
+				"48 83 EC 20 " +
+				"49 BB ???????????????? " +
+				"41 FF D3 " +
+				"48 83 C4 20 " +
+				"48 8B 75 F8 " +
+				"C9 " +
+				"C3 " +
+				"00 00";
 						
 						
 						
@@ -93,6 +195,8 @@ startup
 	vars.scanGameState = new SigScanTarget(0xD, signatureGameState);
 	vars.scanIsLoading = new SigScanTarget(0x30, signatureIsLoadingScene);
 	vars.scanHealthBar = new SigScanTarget(0x8, signatureHealthBar);
+	vars.scanHeroController = new SigScanTarget(0xB, signatureHeroController);
+	vars.scanHelicopter3D = new SigScanTarget(0x11, signatureHelicopter3D);
 
 	//Settings
 	settings.Add("bossSplit", false, "Split only after Boss (Arcade)");
@@ -139,6 +243,8 @@ init
 	var ptrGameState = IntPtr.Zero;
 	var ptrIsLoading = IntPtr.Zero;
 	var ptrHealthBar = IntPtr.Zero;
+	var ptrHeroController = IntPtr.Zero;
+	var ptrHelicopter3D = IntPtr.Zero;
 
 	//Scan the memory for the specified signatures
     foreach (var page in game.MemoryPages(true))
@@ -157,9 +263,17 @@ init
 		{
 			ptrHealthBar = scanner.Scan(vars.scanHealthBar);
 		}
+		if (ptrHeroController == IntPtr.Zero)
+		{
+			ptrHeroController = scanner.Scan(vars.scanHeroController);
+		}
+		if (ptrHelicopter3D == IntPtr.Zero)
+		{
+			ptrHelicopter3D = scanner.Scan(vars.scanHelicopter3D);
+		}
 		
 		//once both signatures have been found abort the search
-		if (ptrGameState != IntPtr.Zero && ptrIsLoading != IntPtr.Zero && ptrHealthBar != IntPtr.Zero)
+		if (ptrGameState != IntPtr.Zero && ptrIsLoading != IntPtr.Zero && ptrHealthBar != IntPtr.Zero && ptrHeroController != IntPtr.Zero && ptrHelicopter3D != IntPtr.Zero)
 		{
 			break;
 		}
@@ -187,13 +301,29 @@ init
         throw new Exception();
     }
 
+	if (ptrHeroController == IntPtr.Zero)
+	{
+        Thread.Sleep(5000);
+		print("OH NO: HeroController couldnt be located");
+        throw new Exception();
+    }
+
+	if (ptrHelicopter3D == IntPtr.Zero)
+	{
+        Thread.Sleep(5000);
+		print("OH NO: Helicopter3D couldnt be located");
+        throw new Exception();
+    }
+
 	//Define Watchers to constantly read the found addresses
 	vars.watchers = new MemoryWatcherList();
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x38)) {Name = "level"});
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrGameState, 0x0, 0x48)) {Name = "gameMode"});
 	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrIsLoading, 0x0)) {Name = "isLoading"});
-	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHealthBar, 0x0, 0x40)) {Name = "healthBarVisible"});
-	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHealthBar, 0x0, 0x30, 0xD4)) {Name = "healthBarUnitHealth"});
+	vars.watchers.Add(new MemoryWatcher<bool>(new DeepPointer(ptrHealthBar, 0x0, 0x40)) {Name = "healthBarHidden"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHealthBar, 0x0, 0x30)) {Name = "healthBarUnitHealth"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHeroController, -0x70, 0x20, 0xA8, 0x494)) {Name = "player1HeroType"});
+	vars.watchers.Add(new MemoryWatcher<int>(new DeepPointer(ptrHelicopter3D, 0x0)) {Name = "helicopter3D"});
 }
 
 update
@@ -207,10 +337,24 @@ update
 	}
 }
 
+start
+{
+	if (vars.watchers["level"].Current == 0 && vars.watchers["player1HeroType"].Current != vars.watchers["player1HeroType"].Old && vars.watchers["gameMode"].Current != 5)
+	{
+		return true;
+	}
+	if (vars.watchers["level"].Current == 0 && vars.watchers["helicopter3D"].Current != vars.watchers["helicopter3D"].Old && vars.watchers["helicopter3D"].Old == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 reset
 {
 	//GameMode 5 = NotSet; 
-	if (settings["autoReset"] && vars.watchers["gameMode"].Current == 5) {
+	if (settings["autoReset"] && vars.watchers["gameMode"].Current == 5)
+	{
 		return true;
 	}
 }
@@ -225,7 +369,7 @@ isLoading
 
 split
 {
-	if (vars.watchers["level"].Current == 63 && vars.watchers["healthBarVisible"].Current == 1 && vars.watchers["healthBarUnitHealth"].Current == -1)
+	if (vars.watchers["level"].Current == 63 && vars.watchers["healthBarUnitHealth"].Current == -1 && vars.watchers["healthBarUnitHealth"].Old == 1)
 	{
 		return true;
 	}
